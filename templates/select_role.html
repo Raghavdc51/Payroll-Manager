@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Select Role | Payroll Manager{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center" style="height: 80vh;">
+    <div class="text-center">
+        <img src="{% static 'myapp/logo.png' %}" alt="Payroll Manager" style="max-height: 80px;" class="mb-3">
+        <h3 class="mb-3">Welcome to Payroll Manager</h3>
+        <p class="text-muted mb-4">Select your role to continue:</p>
+
+        <!-- 🔘 Role Selection Buttons -->
+        <div class="d-grid gap-3">
+        <a href="{% url 'login_admin' %}" class="btn btn-dark btn-lg px-5">
+            Login as Admin 🛡️
+        </a>
+        <a href="{% url 'login_hr' %}" class="btn btn-success btn-lg px-5">
+            Login as HR 💼
+        </a>
+        <a href="{% url 'login_emp' %}" class="btn btn-secondary btn-lg px-5">
+            Login as Employee 👤
+        </a>
+        </div>
+
+        <!-- 📝 Registration Note -->
+        <p class="mt-4 text-muted small">
+        🔒 Admin accounts are restricted to system administrators only.<br>
+        ✅ HR and Employee roles can register via the next screen.
+        </p>
+    </div>
+</div>
+{% endblock %}

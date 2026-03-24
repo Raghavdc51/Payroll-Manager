@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Employee Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <!-- 🖼️ Logo -->
+        <div class="text-center mb-3">
+        <img src="{% static 'myapp/logo.png' %}" alt="Payroll Manager" class="img-fluid" style="max-height: 70px;">
+        </div>
+
+        <!-- 🔐 Login Card -->
+        <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="mb-3 text-center text-secondary">Employee Login Portal 👤</h4>
+            <p class="text-muted text-center mb-4">Access your payroll history and monthly payslips</p>
+
+            <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-secondary w-100">Log In</button>
+            </form>
+
+            <!-- 🔗 Registration Option -->
+            <div class="text-center mt-3">
+            <a href="{% url 'register' %}" class="text-decoration-none">Don't have an account? Register</a>
+            </div>
+        </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

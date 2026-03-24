@@ -1,0 +1,102 @@
+<!-- Payroll Records Card -->
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-semibold">
+            <i class="bi bi-receipt me-2 text-primary"></i> Payroll Records
+        </h6>
+        <small class="text-muted">
+            Showing <span id="visiblePayrollCount">{{ payrolls|length }}</span> record{{ payrolls|length|pluralize }}
+        </small>
+    </div>
+
+    <div class="card-body pb-2">
+        <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input id="payrollSearchInput" type="text" class="form-control" 
+                placeholder="Search by employee name..." />
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="payrollTable" class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Employee</th>
+                    <th>Month</th>
+                    <th>Net Salary</th>
+                    <th>Status</th>
+                    <th>Generated On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pay in payrolls %}
+                    <tr>
+                        <td class="fw-medium">{{ pay.structure.employee.full_name }}</td>
+                        <td>{{ pay.month }}</td>
+                        <td>
+                            <span class="fw-bold">₹{{ pay.net_salary|floatformat:2 }}</span>
+                        </td>
+                        <td>
+                            {% if pay.is_paid %}
+                                <span class="badge bg-success px-3 py-2">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark px-3 py-2">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">
+                            {{ pay.created_at|date:"d M Y" }}
+                        </td>
+                        <td>
+                            <a href="{% url 'preview_payslip' pay.id %}" 
+                                class="btn btn-sm btn-primary" title="View & Save as PDF">
+                                <i class="bi bi-eye me-1"></i> View & Save PDF
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-info-circle fs-4 me-2"></i>
+                            No payroll records available yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer bg-white text-muted small text-center py-2">
+        <i class="bi bi-calendar-event me-1"></i>
+        Records are shown for all payrolls generated so far.
+    </div>
+</div>
+
+<!-- Live Search Script (unchanged) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("payrollSearchInput");
+    const countDisplay = document.getElementById("visiblePayrollCount");
+    const rows = document.querySelectorAll("#payrollTable tbody tr");
+
+    function applyFilter() {
+        const term = searchInput.value.trim().toUpperCase();
+        let visible = 0;
+
+        rows.forEach(row => {
+            if (row.cells.length < 1) return;
+            const nameText = row.cells[0].textContent.trim().toUpperCase();
+            const match = !term || nameText.includes(term);
+            row.style.display = match ? "" : "none";
+            if (match) visible++;
+        });
+
+        countDisplay.textContent = visible;
+    }
+
+    searchInput.addEventListener("keyup", applyFilter);
+    applyFilter();
+});
+</script>

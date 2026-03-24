@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Payroll Manager{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- ✅ Bootstrap CSS + Your Styles -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+    </head>
+
+    <body class="bg-light">
+
+    <!-- 🔗 Navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- 📌 Main Tab Navigation — Only for Logged-In Users -->
+    {% if request.user.is_authenticated %}
+    <div class="bg-white border-bottom px-4 pt-3">
+        <ul class="nav nav-tabs" id="dashboard-tabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-dashboard">📊 Dashboard</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employees">👥 Employees</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-salary">💰 Salary Structures</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-payrolls">🧾 Payrolls</button>
+        </li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- 🧩 Page Content Placeholder -->
+    <div class="container py-4">
+        <div class="tab-content" id="dashboard-tab-content">
+        {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <style>
+    /* Hide scrollbar - Chrome, Edge, Safari, Opera */
+    ::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Hide scrollbar - Firefox */
+    html {
+        scrollbar-width: none !important;
+    }
+
+    /* Hide scrollbar - Internet Explorer / legacy Edge */
+    body {
+        -ms-overflow-style: none !important;
+    }
+
+    /* Make sure scrolling still works */
+    html, body {
+        overflow-y: auto !important;   /* or scroll if you want always visible space */
+        overflow-x: hidden !important;
+        height: 100%;
+    }
+</style>
+
+    <!-- ⚙️ Bootstrap Bundle -->
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> {% endcomment %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ✅ Toast Notifications Using Django Messages -->
+    {% if messages %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% for message in messages %}
+        <div class="toast text-bg-{{ message.tags }} border-0 show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 🧠 Optional Scripts Block -->
+    {% block scripts %}{% endblock %}
+    <script>
+  // ✅ Auto-dismiss all .toast notifications after 5 seconds
+    document.querySelectorAll('.toast').forEach(function(toastEl) {
+        const toast = new bootstrap.Toast(toastEl, {
+        delay: 5000,       // ⏱️ Time in milliseconds (5 seconds)
+        autohide: true     // 🎯 Enables auto-hide
+        });
+        toast.show();        // 🚀 Show toast
+    });
+    </script>
+</body>
+</html>

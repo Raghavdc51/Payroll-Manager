@@ -1,0 +1,55 @@
+<!-- 📄 File: templates/registration/register.html -->
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <!-- 🖼️ Logo -->
+        <div class="text-center mb-3">
+        <img src="{% static 'myapp/logo.png' %}" alt="Payroll Manager" class="img-fluid" style="max-height: 70px;">
+        </div>
+
+        <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="mb-3 text-center text-primary">Create Account 🔐</h4>
+            <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label>Username</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Role</label>
+                <select name="role" class="form-select" required>
+                <option value="emp">Employee 👤</option>
+                <option value="hr">HR 💼</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'select_role' %}" class="btn btn-link">Already registered? Login</a>
+            </div>
+            </form>
+
+            <!-- 🚫 Admin Notice -->
+            <p class="text-muted text-center small mt-3">
+            🛑 Admin accounts must be created by system administrators using terminal access.
+            </p>
+        </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

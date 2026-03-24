@@ -1,0 +1,154 @@
+<!-- 💸 Salary Structure Panel -->
+<div class="card shadow-sm border-0">
+    <!-- Header -->
+    {% comment %} <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-semibold">💰 Salary Structures</h6>
+        {% if role == 'admin' or role == 'hr' %}
+        <a href="{% url 'some_add_structure_view' %}" class="btn btn-sm btn-success">+ Add Structure</a>  <!-- optional – add if you have a create view -->
+        {% endif %}
+    </div> {% endcomment %}
+
+    <!-- Search Control -->
+    <div class="px-3 py-2 d-flex gap-2 flex-wrap">
+        <input id="salarySearchInput" type="text" class="form-control form-control-sm" 
+            placeholder="Search by employee name..." />
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table id="salaryTable" class="table table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Employee</th>
+                    <th>Basic</th>
+                    <th>HRA</th>
+                    <th>Allowances</th>
+                    <th>Deductions</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for structure in salary_structures %}
+                <tr>
+                    <td>{{ structure.employee.full_name }}</td>
+                    <td>{{ structure.basic }}</td>
+                    <td>{{ structure.hra }}</td>
+                    <td>{{ structure.allowances }}</td>
+                    <td>{{ structure.deductions }}</td>
+                    <td>
+                        {% if role == 'admin' or role == 'hr' %}
+                        <button class="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editModal"
+                                data-id="{{ structure.id }}"
+                                data-employee="{{ structure.employee.full_name }}"
+                                data-basic="{{ structure.basic }}"
+                                data-hra="{{ structure.hra }}"
+                                data-allowances="{{ structure.allowances }}"
+                                data-deductions="{{ structure.deductions }}">
+                            ✏️ Edit
+                        </button>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No salary structures found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer with dynamic visible count -->
+    <div class="card-footer bg-white text-muted small text-center py-2">
+        Showing <span id="visibleSalaryCount">{{ salary_structures.count }}</span> record{{ salary_structures.count|pluralize }}
+    </div>
+</div>
+
+<!-- Edit Salary Modal (unchanged) -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="{% url 'update_salary_structure' %}">
+            {% csrf_token %}
+            <input type="hidden" name="structure_id" id="modal-id">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Salary Structure</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label>Employee</label>
+                        <input type="text" id="modal-employee" class="form-control" readonly>
+                    </div>
+                    <div class="mb-2">
+                        <label>Basic</label>
+                        <input type="number" name="basic" id="modal-basic" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>HRA</label>
+                        <input type="number" name="hra" id="modal-hra" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Allowances</label>
+                        <input type="number" name="allowances" id="modal-allowances" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Deductions</label>
+                        <input type="number" name="deductions" id="modal-deductions" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Populate Modal + Live Search Script -->
+<script>
+// Modal population (your original code – unchanged)
+const editModal = document.getElementById('editModal');
+editModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('modal-id').value = button.getAttribute('data-id');
+    document.getElementById('modal-employee').value = button.getAttribute('data-employee');
+    document.getElementById('modal-basic').value = button.getAttribute('data-basic');
+    document.getElementById('modal-hra').value = button.getAttribute('data-hra');
+    document.getElementById('modal-allowances').value = button.getAttribute('data-allowances');
+    document.getElementById('modal-deductions').value = button.getAttribute('data-deductions');
+});
+
+// Live search filtering
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("salarySearchInput");
+    const countDisplay = document.getElementById("visibleSalaryCount");
+    const rows = document.querySelectorAll("#salaryTable tbody tr");
+
+    function applyFilter() {
+        const term = searchInput.value.trim().toUpperCase();
+        let visible = 0;
+
+        rows.forEach(row => {
+            // Employee name is in column 0
+            const nameText = row.cells[0].textContent.trim().toUpperCase();
+            const match = !term || nameText.includes(term);
+            row.style.display = match ? "" : "none";
+            if (match) visible++;
+        });
+
+        countDisplay.textContent = visible;
+    }
+
+    searchInput.addEventListener("keyup", applyFilter);
+    applyFilter(); // initial run
+});
+</script>

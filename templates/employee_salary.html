@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}My Salary Structure | Payroll Manager{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">My Salary Structure</h5>
+            <small>View only – contact HR for any changes</small>
+        </div>
+        
+        <div class="card-body">
+            {% if salary_structure %}
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-3">Employee Details</h6>
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ employee.full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Position</th>
+                            <td>{{ employee.position }}</td>
+                        </tr>
+                        <tr>
+                            <th>Department</th>
+                            <td>{{ employee.department }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <span class="badge bg-success">Active</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-3">Salary Components</h6>
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Component</th>
+                                <th class="text-end">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic</td>
+                                <td class="text-end">{{ salary_structure.basic|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>HRA</td>
+                                <td class="text-end">{{ salary_structure.hra|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Allowances</td>
+                                <td class="text-end">{{ salary_structure.allowances|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Deductions</td>
+                                <td class="text-end">{{ salary_structure.deductions|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="table-active fw-bold">
+                                <td>Gross Salary</td>
+                                <td class="text-end">{{ salary_structure.gross_salary|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="table-success fw-bold">
+                                <td>Net Salary</td>
+                                <td class="text-end">{{ salary_structure.net_salary|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4 small">
+                <i class="bi bi-info-circle me-2"></i>
+                This is your current salary structure as per records. Any changes must be requested through HR.
+            </div>
+            
+            {% else %}
+            <div class="alert alert-warning text-center">
+                No salary structure found for your profile yet. Please contact HR.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

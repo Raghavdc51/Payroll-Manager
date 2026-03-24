@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <!-- 🖼️ Logo -->
+        <div class="text-center mb-3">
+        <img src="{% static 'myapp/logo.png' %}" alt="Payroll Manager" class="img-fluid" style="max-height: 70px;">
+        </div>
+
+        <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="mb-3 text-center text-dark">Admin Login Portal 🛡️</h4>
+            <p class="text-muted text-center mb-4">System administrator access only</p>
+
+            <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-dark w-100">Log In</button>
+            </form>
+
+            <!-- 🚫 No Registration for Admin -->
+            <div class="text-center mt-3">
+            <p class="small text-muted">Admin accounts must be created by system operators.</p>
+            </div>
+        </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Add Employee{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h4 class="mb-3">➕ Add New Employee</h4>
+
+    <!-- 👇 Display any form validation errors -->
+    {% if form.errors %}
+        <div class="alert alert-danger">Please correct the errors below.</div>
+    {% endif %}
+
+    <!-- ✅ Employee creation form -->
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Renders all form fields with Bootstrap classes -->
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

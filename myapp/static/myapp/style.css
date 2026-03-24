@@ -1,0 +1,66 @@
+/* 🌐 General Layout */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+    scroll-behavior: smooth;
+    }
+
+    /* 🔝 Navbar */
+    .navbar {
+    padding: 0.75rem 1rem;
+    }
+    .navbar-brand {
+    font-weight: 600;
+    font-size: 1.2rem;
+    }
+    .navbar-brand img {
+    height: 36px;
+    }
+
+    /* 🧭 Tabs */
+    .nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+    }
+    .nav-tabs .nav-link {
+    font-weight: 500;
+    color: #495057;
+    transition: 0.3s;
+    border: none;
+    border-bottom: 3px solid transparent;
+    }
+    .nav-tabs .nav-link:hover {
+    background-color: #f1f3f5;
+    }
+    .nav-tabs .nav-link.active {
+    border-bottom: 3px solid #0d6efd;
+    background-color: #e9f1ff;
+    color: #0d6efd !important;
+    }
+
+    /* 💼 Cards */
+    .card {
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease;
+    }
+    .card:hover {
+    transform: translateY(-4px);
+    }
+
+    /* 📊 Chart Box */
+    canvas {
+    width: 100% !important;
+    }
+
+    /* 📱 Responsive Fixes */
+    @media (max-width: 768px) {
+    .nav-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    .card h2, .card h3, .card h5 {
+        font-size: 1rem;
+    }
+}

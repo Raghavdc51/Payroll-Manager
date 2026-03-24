@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Payroll Manager{% endblock %}
+
+{% block content %}
+<!-- 🧭 Tab Content Start -->
+<div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel">
+
+    <!-- 👋 Welcome Section -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+        <h4 class="mb-0">Welcome back, {{ request.user.username }} 👋</h4>
+        <small class="text-muted">Logged in as <strong>{{ role|capfirst }}</strong></small>
+        </div>
+    </div>
+
+    {% if role == 'admin' %}
+    <!-- 👑 Admin Summary Cards -->
+    <div class="row g-3">
+        <div class="col-md-4">
+        <div class="card bg-success text-white shadow-sm h-100">
+            <div class="card-body text-center">
+            <h5>Total Employees</h5>
+            <h2>{{ employee_count }}</h2>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-4">
+        <div class="card bg-primary text-white shadow-sm h-100">
+            <div class="card-body text-center">
+            <h5>Total Payrolls</h5>
+            <h2>{{ payroll_count }}</h2>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-4">
+        <div class="card bg-info text-white shadow-sm h-100">
+            <div class="card-body text-center">
+            <h5>Paid Payrolls</h5>
+            <h2>{{ paid_count }}</h2>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 📊 Admin Doughnut Chart -->
+    <div class="mt-4">
+        <h5 class="text-muted">Payroll Status</h5>
+        <canvas id="payChart" style="max-height: 298px;"></canvas>
+    </div>
+
+    {% elif role == 'hr' %}
+    <!-- 💼 HR Dashboard Overview -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+        <h5>Total Employees: {{ employee_count }}</h5>
+        </div>
+    </div>
+
+    <!-- 📍 HR Summary Badges -->
+    <div class="mb-3">
+        <span class="badge bg-warning text-dark me-2">Unpaid Payrolls: {{ unpaid_count }}</span>
+        <span class="badge bg-primary text-white">Total Payrolls: {{ payroll_count }}</span>
+    </div>
+
+    <!-- 🔍 Search + Department Filters -->
+    <div class="row g-2 mb-3">
+        <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">Search</span>
+            <input type="text" id="payrollSearch" class="form-control" placeholder="Name or month...">
+        </div>
+        </div>
+        <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">Department</span>
+            <select id="deptFilter" class="form-select">
+            <option value="">All</option>
+            {% for d in department_list %}
+                <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+            </select>
+        </div>
+        </div>
+    </div>
+    <!-- 📋 HR: Pending Payrolls Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">Pending Payrolls</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+        <table id="pendingPayrollTable" class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+            <tr>
+                <th onclick="sortTable(0)">Employee Name 🔽</th>
+                <th onclick="sortTable(1)">Department 🔽</th>
+                <th onclick="sortTable(2)">Month 🔽</th>
+                <th onclick="sortTable(3)">Amount 🔽</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for p in pending_payrolls %}
+            <tr data-dept="{{ p.structure.employee.department }}">
+                <!-- 👤 Employee Name -->
+                <td>{{ p.structure.employee.full_name }}</td>
+
+                <!-- 🏢 Department -->
+                <td>{{ p.structure.employee.department }}</td>
+
+                <!-- 📅 Payroll Month -->
+                <td>{{ p.month }}</td>
+
+                <!-- 💰 Salary Amount with Dynamic Badge -->
+                <td>
+                {% if p.net_salary < 40000 %}
+                    <span class="badge bg-danger fs-6">
+                    <i class="bi bi-currency-rupee"></i> {{ p.net_salary|floatformat:2 }}
+                </span>
+                {% elif p.net_salary < 60000 %}
+                    <span class="badge bg-warning text-dark fs-6">
+                    <i class="bi bi-currency-rupee"></i> {{ p.net_salary|floatformat:2 }}
+                </span>
+                {% else %}
+                    <span class="badge bg-success fs-6">
+                    <i class="bi bi-currency-rupee"></i> {{ p.net_salary|floatformat:2 }}
+                </span>
+                {% endif %}
+                </td>
+
+                <!-- ✅ Mark as Paid Form -->
+                <td>
+                <form method="post" action="{% url 'mark_payroll_paid' p.id %}" onsubmit="showToast()" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">Mark Paid</button>
+                </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-muted text-center">No pending payrolls 🎉</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{% elif role == 'emp' %}
+<!-- 👨‍💼 Employee Panel with Salary + History -->
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Your Salary Breakdown</h6>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Basic: ₹{{ salary.basic }}</li>
+            <li class="list-group-item">HRA: ₹{{ salary.hra }}</li>
+            <li class="list-group-item">Allowances: ₹{{ salary.allowances }}</li>
+            <li class="list-group-item">Deductions: ₹{{ salary.deductions }}</li>
+            <li class="list-group-item fw-bold">Net: ₹{{ salary.net_salary }}</li>
+        </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Payroll History</h6>
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for pay in payrolls %}
+            <li class="list-group-item">
+            {{ pay.month }} — ₹{{ pay.net_salary }} — {{ pay.is_paid|yesno:"Paid,Unpaid" }}
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">No payroll records found.</li>
+            {% endfor %}
+        </ul>
+        </div>
+    </div>
+    </div>
+    {% endif %}
+    </div> <!-- closes tab-dashboard -->
+
+    <!-- 📂 Tab Panels for Other Pages -->
+    <div class="tab-pane fade" id="tab-employees" role="tabpanel">
+    {% include 'partials/employee_list.html' %}
+    </div>
+    <div class="tab-pane fade" id="tab-salary" role="tabpanel">
+    {% include 'partials/salary_stucture.html' %}
+    </div>
+    <div class="tab-pane fade" id="tab-payrolls" role="tabpanel">
+    {% include 'partials/payroll_list.html' %}
+    </div>
+    {% endblock %}
+
+    <!-- ✅ Toast Container for Feedback -->
+    <div id="toastMessage" style="
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #198754;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+    ✅ Payroll marked as paid!
+    </div>
+
+    {% block scripts %}
+    <!-- 📊 Admin Chart: Doughnut Showing Paid vs Unpaid -->
+    {% if role|lower == 'admin' %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const paid = Number({{ paid_count|default:0 }});
+    const unpaid = Number({{ unpaid_count|default:0 }});
+    const ctx = document.getElementById('payChart');
+    if (ctx) {
+        new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Paid', 'Unpaid'],
+            datasets: [{
+            data: [paid, unpaid],
+            backgroundColor: ['#0d6efd', '#dc3545'],
+            borderWidth: 1
+            }]
+        },
+        options: {
+            cutout: '60%',
+            plugins: {
+            legend: { position: 'bottom' }
+            }
+        }
+        });
+    }
+    });
+    </script>
+    {% endif %}
+
+    <!-- 🔁 Table Sorting Function -->
+    <script>
+    function sortTable(columnIndex) {
+    const table = document.getElementById("pendingPayrollTable");
+    const rows = Array.from(table?.rows || []).slice(1); // skip header
+    const tbody = table.querySelector("tbody");
+    const sorted = rows.sort((a, b) => {
+        const A = a.cells[columnIndex].innerText.toLowerCase();
+        const B = b.cells[columnIndex].innerText.toLowerCase();
+        return A.localeCompare(B);
+    });
+    sorted.forEach(row => tbody.appendChild(row));
+    }
+    document.addEventListener("DOMContentLoaded", () => sortTable(2)); // default sort by Month
+    </script>
+
+    <!-- 🔎 HR Filters: Search & Department -->
+    {% if role == 'hr' %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("payrollSearch");
+    const deptSelect = document.getElementById("deptFilter");
+    const rows = document.querySelectorAll("#pendingPayrollTable tbody tr");
+
+    function filterPayrolls() {
+    const query = searchInput.value.toLowerCase();
+    const selectedDept = deptSelect.value;
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowDept = row.getAttribute("data-dept");
+        const matchText = text.includes(query);
+        const matchDept = !selectedDept || selectedDept === rowDept;
+        row.style.display = matchText && matchDept ? "" : "none";
+        });
+    }
+
+    searchInput.addEventListener("keyup", filterPayrolls);
+    deptSelect.addEventListener("change", filterPayrolls);
+    });
+    </script>
+    {% endif %}
+
+    <!-- ✅ Show Toast After Submit -->
+    <script>
+    function showToast() {
+    const toast = document.getElementById("toastMessage");
+    toast.style.display = "block";
+    setTimeout(() => {
+        toast.style.display = "none";
+    }, 5000); // show for 5 seconds
+    }
+    </script>
+
+    <!-- 🔔 Toast for Django Messages -->
+    {% if messages %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    {% for message in messages %}
+    const toast = document.getElementById("toastMessage");
+    if (toast) {
+        toast.textContent = "✅ {{ message }}";
+        toast.style.display = "block";
+        setTimeout(() => {
+        toast.style.display = "none";
+        }, 5000);
+    }
+    {% endfor %}
+});
+</script>
+{% endif %}
+{% endblock %}

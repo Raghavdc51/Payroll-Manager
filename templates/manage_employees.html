@@ -1,0 +1,18 @@
+<!-- 📄 File: templates/manage_employees.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Manage Employees</h3>
+<table class="table table-striped">
+    <thead><tr><th>Name</th><th>Dept</th><th>Job</th><th>Email</th></tr></thead>
+    <tbody>
+        {% for emp in employees %}
+        <tr>
+        <td>{{ emp.user.get_full_name }}</td>
+        <td>{{ emp.department }}</td>
+        <td>{{ emp.job_title }}</td>
+        <td>{{ emp.user.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,173 @@
+<!-- 📦 Employee Directory -->
+<div class="card shadow-sm border-0">
+
+    <!-- 🧭 Header -->
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 d-flex align-items-center gap-2">
+        Employee Directory
+        {% comment %} <span id="employeeCount" class="badge bg-primary rounded-pill">0</span> {% endcomment %}
+        </h6>
+        {% if role == 'admin' or role == 'hr' %}
+        <a href="{% url 'add_employee' %}" class="btn btn-sm btn-success">+ Add Employee</a>
+        {% endif %}
+    </div>
+
+    <!-- 🔍 Filter Controls -->
+    <div class="px-3 py-2 d-flex gap-2 flex-wrap">
+        <!-- 🔎 Name Search -->
+        <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="Search by name..." />
+
+        <!-- 📌 Position Dropdown -->
+        <select id="positionFilter" class="form-select form-select-sm">
+        <option value="">All Positions</option>
+        <option value="Developer">Developer</option>
+        <option value="Backend Engineer">Backend Engineer</option>
+        <option value="QA Engineer">QA Engineer</option>
+        <option value="HR Coordinator">HR Coordinator</option>
+        <option value="HR Manager">HR Manager</option>
+        <option value="UI/UX Designer">UI/UX Designer</option>
+        <option value="Marketing Specialist">Marketing Specialist</option>
+        <option value="Financial Analyst">Financial Analyst</option>
+        <option value="Support Executive">Support Executive</option>
+        <option value="Data Analyst">Data Analyst</option>
+        </select>
+
+        <!-- 🏢 Department Dropdown -->
+        <select id="departmentFilter" class="form-select form-select-sm">
+        <option value="">All Departments</option>
+        <option value="Engineering">Engineering</option>
+        <option value="Design">Design</option>
+        <option value="Human Resources">Human Resources</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Finance">Finance</option>
+        <option value="Analytics">Analytics</option>
+        <option value="Customer Success">Customer Success</option>
+        </select>
+
+        <!-- ❌ Clear Filters Button -->
+        <button onclick="clearFilters()" class="btn btn-sm btn-outline-secondary">Clear Filters</button>
+    </div>
+
+    <!-- 📊 Employee Table -->
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Salary (₹)</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+            <td>{{ emp.full_name }}</td>
+            <td>{{ emp.position }}</td>
+            <td>{{ emp.salary }}</td>
+            <td>{{ emp.department }}</td>
+            <td>
+                {% if emp.status == 'active' %}
+                <span class="badge bg-success">Active</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'edit_employee' emp.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'delete_employee' emp.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No employees found.</td></tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    </div>
+
+    <!-- 📱 Mobile Add Button -->
+    {% if role == 'admin' or role == 'hr' %}
+    <a href="{% url 'add_employee' %}" class="btn btn-success d-md-none position-fixed shadow"
+    style="bottom: 20px; right: 20px; z-index: 1030; border-radius: 50%; width: 56px; height: 56px;
+            font-size: 24px; display: flex; align-items: center; justify-content: center;">
+    + Add
+    </a>
+    {% endif %}
+
+    <!-- 🧠 Smart Filter Script -->
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const positionFilter = document.getElementById("positionFilter");
+    const departmentFilter = document.getElementById("departmentFilter");
+    const employeeCount = document.getElementById("employeeCount");
+
+    // 🔍 Filter logic
+    function applyFilters() {
+        const name = searchInput.value.trim().toUpperCase();
+        const position = positionFilter.value.trim().toUpperCase();
+        const department = departmentFilter.value.trim().toUpperCase();
+
+        const rows = document.querySelectorAll("table tbody tr");
+        let count = 0;
+
+        rows.forEach(row => {
+        const nameText = row.cells[0].textContent.trim().toUpperCase();
+        const positionText = row.cells[1].textContent.trim().toUpperCase();
+        const deptText = row.cells[3].textContent.trim().toUpperCase();
+
+        const matchName = !name || nameText.includes(name);
+        const matchPosition = !position || positionText === position;
+        const matchDept = !department || deptText === department;
+
+        const show = matchName && matchPosition && matchDept;
+        row.style.display = show ? "" : "none";
+        if (show) count++;
+        });
+
+        employeeCount.textContent = count;
+
+        // 👀 Hide one dropdown if the other is selected
+        if (positionFilter.value !== "") {
+        departmentFilter.style.display = "none";
+        } else {
+        departmentFilter.style.display = "block";
+        }
+
+        if (departmentFilter.value !== "") {
+        positionFilter.style.display = "none";
+        } else {
+        positionFilter.style.display = "block";
+        }
+    }
+
+    // 🧼 Clear all filters
+    window.clearFilters = function () {
+        searchInput.value = "";
+
+        // Reset both dropdowns
+        positionFilter.selectedIndex = 0;
+        departmentFilter.selectedIndex = 0;
+
+        // Explicitly reset values
+        positionFilter.value = "";
+        departmentFilter.value = "";
+
+        // Restore both dropdowns
+        positionFilter.style.display = "block";
+        departmentFilter.style.display = "block";
+
+        applyFilters();
+    };
+
+    // 📌 Bind events
+    searchInput.addEventListener("keyup", applyFilters);
+    positionFilter.addEventListener("change", applyFilters);
+    departmentFilter.addEventListener("change", applyFilters);
+
+  applyFilters(); // Initial run
+});
+</script>
