@@ -4,7 +4,45 @@ A Django-based payroll management system with role-based authentication for Admi
 
 ---
 
+## 🌐 Live Demo
+
+**Deployed on PythonAnywhere:**
+https://RaghavendraDC.pythonanywhere.com/
+
+### Demo Credentials
+
+**Admin Login:**
+```
+Username: admin
+Password: [123]
+```
+
+**Role Selection Page:**
+- URL: https://RaghavendraDC.pythonanywhere.com/
+- Select your role (Admin, HR, or Employee)
+- Use provided credentials or register as a new employee/HR
+
+**Test Accounts:**
+- Create a new Employee or HR account during registration
+- The system links your account to employee records in the database
+- Employees can only view their own salary information
+
+---
+
 ## ✨ Features
+  ## Key Features
+
+### Role-Based Access
+- **Admin**: Full system control
+- **HR**: Manage employees and payroll
+- **Employee**: View own salary and payslips
+
+### Employee Account Linking
+When registering as an Employee or HR, the system links your account to an employee record:
+- Username must match an existing employee name
+- Login credentials are tied to that employee's payroll data
+- Ensures employees see only their own salary info
+
 
 ### 👑 Admin
 - Dashboard with summary statistics
